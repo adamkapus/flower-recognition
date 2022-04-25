@@ -1,0 +1,11 @@
+
+<resources>
+    <string name="app_name">Flower recognition</string>
+    <string name="permission_deny_text">Required permissions denied. Exiting.</string>
+    <string name="tensorflow_lite_logo_description">TensorFlow Lite logo</string>
+    <string name="launch_recognizer">Recognize</string>
+    <string name="launch_map">View map</string>
+    <string name="title_activity_maps">MapsActivity</string>
+    <string name="map">MAP</string>
+    <string name="recognizeFlower">Recognize a flower</string>
+</resources>
