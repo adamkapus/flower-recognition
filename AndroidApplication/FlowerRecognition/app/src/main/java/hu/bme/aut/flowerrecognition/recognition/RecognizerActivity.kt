@@ -130,6 +130,7 @@ class RecognizerActivity : AppCompatActivity() {
             R.id.menu_map -> {
                 val mapsIntent = Intent(this, MapsActivity::class.java)
                 startActivity(mapsIntent)
+                finish()
                 true
             }
 

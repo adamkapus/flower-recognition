@@ -87,6 +87,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
             R.id.menu_recognizer -> {
                 val recognizerIntent = Intent(this, RecognizerActivity::class.java)
                 startActivity(recognizerIntent)
+                finish()
                 true
             }
             R.id.menu_map -> {
