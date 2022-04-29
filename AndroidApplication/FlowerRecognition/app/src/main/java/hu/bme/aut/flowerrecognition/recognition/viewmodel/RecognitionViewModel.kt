@@ -4,6 +4,7 @@ import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import hu.bme.aut.flowerrecognition.FlowerRecognitionApplication
 import hu.bme.aut.flowerrecognition.data.FlowerLocationRepository
 
 private const val MAX_ANALYSIS_ROUNDS = 10
@@ -19,7 +20,7 @@ class RecognitionViewModel : ViewModel() {
     private val _recognitionList = MutableLiveData<List<Recognition>>()
     val recognitionList: LiveData<List<Recognition>> = _recognitionList
 
-    private val flowerLocRepo = FlowerLocationRepository()
+    private val flowerLocRepo = FlowerRecognitionApplication.flowerLocationRepository
 
     fun addRecognition(newRecognitions: List<Recognition>){
         numberOfAnalysisRounds++
