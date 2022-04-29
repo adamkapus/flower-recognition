@@ -1,11 +1,15 @@
 
 <resources>
     <string name="app_name">Flower recognition</string>
-    <string name="permission_deny_text">Required permissions denied. Exiting.</string>
+    <string name="permission_deny_text">You cannot recognize flowers without the camera.</string>
     <string name="tensorflow_lite_logo_description">TensorFlow Lite logo</string>
     <string name="launch_recognizer">Recognize</string>
     <string name="launch_map">View map</string>
     <string name="title_activity_maps">MapsActivity</string>
     <string name="map">MAP</string>
     <string name="recognizeFlower">Recognize a flower</string>
+    <string name="rationale_dialog_title">Why we need this permission</string>
+    <string name="proceed">OK</string>
+    <string name="exit">Exit</string>
+    <string name="contacts_permission_explanation">We need access to the camera image to perform image analysis.</string>
 </resources>

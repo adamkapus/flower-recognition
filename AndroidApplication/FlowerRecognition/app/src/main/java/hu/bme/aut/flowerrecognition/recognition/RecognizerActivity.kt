@@ -16,6 +16,8 @@ import android.view.MenuItem
 import android.widget.Button
 import android.widget.Toast
 import androidx.activity.viewModels
+import androidx.annotation.StringRes
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.camera.core.Camera
 import androidx.camera.core.CameraSelector
@@ -40,12 +42,6 @@ import org.tensorflow.lite.support.model.Model
 import java.util.concurrent.Executors
 import org.tensorflow.lite.gpu.CompatibilityList
 
-// Constants
-private const val MAX_RESULT_DISPLAY = 7 // Maximum number of results displayed
-private const val TAG = "Recognizer Activity" // Name for logging
-private const val REQUEST_CODE_PERMISSIONS = 999 // Return code after asking for permission
-private val REQUIRED_PERMISSIONS = arrayOf(Manifest.permission.CAMERA) // permission needed
-
 // Listener for the result of the ImageAnalyzer
 typealias RecognitionListener = (recognition: List<Recognition>) -> Unit
 
@@ -53,6 +49,15 @@ typealias RecognitionListener = (recognition: List<Recognition>) -> Unit
  * Main entry point into TensorFlow Lite Classifier
  */
 class RecognizerActivity : AppCompatActivity() {
+
+    companion object {
+        private const val PERMISSIONS_REQUEST_CAMERA = 999
+        private const val PERMISSIONS_ACCESS_FINE_LOCATION = 1
+
+        private const val MAX_RESULT_DISPLAY = 7
+
+        private const val TAG = "Recognizer Activity"
+    }
     private lateinit var binding : ActivityRecognizerBinding
     private lateinit var submitButton : Button
     private lateinit var startButton : Button
@@ -95,7 +100,7 @@ class RecognizerActivity : AppCompatActivity() {
             Observer {
                 when(it){
                     StateOfRecognition.READY_TO_START ->{ submitButton.isEnabled=false; startButton.isEnabled=true;}
-                    StateOfRecognition.IN_PROGRESS ->{ submitButton.isEnabled=false; startButton.isEnabled=false; startRecognition()}
+                    StateOfRecognition.IN_PROGRESS ->{ submitButton.isEnabled=false; startButton.isEnabled=false; startCamera()}
                     StateOfRecognition.FINISHED ->{ submitButton.isEnabled=true; startButton.isEnabled=true; stopCamera()}
                 }
             }
@@ -108,14 +113,15 @@ class RecognizerActivity : AppCompatActivity() {
 
         val startButton: Button = findViewById(R.id.start_camera_button)
         startButton.setOnClickListener {
-            recogViewModel.startRecognition()
+            //recogViewModel.startRecognition()
+            handleCameraPermission()
         }
 
 
 
     }
 
-    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+    override fun onCreateOptionsMenu(menu: Menu): Boolean {
         val inflater: MenuInflater = menuInflater
         inflater.inflate(R.menu.menu_toolbar, menu)
         return true
@@ -138,38 +144,81 @@ class RecognizerActivity : AppCompatActivity() {
         }
     }
 
-    private fun allPermissionsGranted(): Boolean = REQUIRED_PERMISSIONS.all {
+
+    private fun handleCameraPermission(){
+        if (permissionGranted(arrayOf(Manifest.permission.CAMERA))) {
+            recogViewModel.startRecognition()
+        }
+
+        else if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.CAMERA)) {
+            showRationaleDialog(
+                explanation = R.string.contacts_permission_explanation,
+                onNegativeButton = {Toast.makeText(this, getString(R.string.permission_deny_text), Toast.LENGTH_SHORT).show()},
+                onPositiveButton = { (this::requestPermission)(arrayOf(Manifest.permission.CAMERA), PERMISSIONS_REQUEST_CAMERA) }
+            )
+
+        }
+
+        else {
+            requestPermission(arrayOf(Manifest.permission.CAMERA), PERMISSIONS_REQUEST_CAMERA)
+        }
+    }
+
+    private fun permissionGranted(permissions: Array<String>): Boolean = permissions.all {
         ContextCompat.checkSelfPermission(
             baseContext, it
         ) == PackageManager.PERMISSION_GRANTED
     }
+
+    private fun showRationaleDialog(
+        @StringRes title: Int = R.string.rationale_dialog_title,
+        @StringRes explanation: Int,
+        onPositiveButton: () -> Unit,
+        onNegativeButton: () -> Unit = this::finish
+    ) {
+        val alertDialog = AlertDialog.Builder(this)
+            .setTitle(title)
+            .setMessage(explanation)
+            .setCancelable(false)
+            .setPositiveButton(R.string.proceed) { dialog, id ->
+                dialog.cancel()
+                onPositiveButton()
+            }
+            .setNegativeButton(R.string.exit) { dialog, id -> onNegativeButton() }
+            .create()
+        alertDialog.show()
+    }
+
+    private fun requestPermission(permission : Array<String>, requestCode: Int){
+        ActivityCompat.requestPermissions(
+            this,
+            permission,
+           requestCode
+        )
+    }
+
 
     override fun onRequestPermissionsResult(
         requestCode: Int,
         permissions: Array<String>,
         grantResults: IntArray
     ) {
-        if (requestCode == REQUEST_CODE_PERMISSIONS) {
-            if (allPermissionsGranted()) {
-                startCamera()
-            } else {
-                Toast.makeText(
-                    this,
-                    getString(R.string.permission_deny_text),
-                    Toast.LENGTH_SHORT
-                ).show()
-                finish()
-            }
-        }
-    }
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
 
-    private fun startRecognition(){
-        if (allPermissionsGranted()) {
-            startCamera()
-        } else {
-            ActivityCompat.requestPermissions(
-                this, REQUIRED_PERMISSIONS, REQUEST_CODE_PERMISSIONS
-            )
+        when (requestCode) {
+            PERMISSIONS_REQUEST_CAMERA -> {
+                if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    startCamera()
+                } else {
+                    Toast.makeText(
+                        this,
+                        getString(R.string.permission_deny_text),
+                        Toast.LENGTH_SHORT
+                    ).show()
+                    //finish()
+                }
+                return
+            }
         }
     }
 
