@@ -23,6 +23,7 @@ import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MarkerOptions
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
+import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import hu.bme.aut.flowerrecognition.R
 import hu.bme.aut.flowerrecognition.data.model.FlowerLocation
 import hu.bme.aut.flowerrecognition.databinding.ActivityMapsBinding
@@ -127,7 +128,10 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
     private fun drawFlowersOnMap(flowers: List<FlowerLocation>) {
         for (f in flowers) {
             val pos = LatLng(f.Lat!!.toDouble(), f.Lng!!.toDouble())
-            mMap.addMarker(MarkerOptions().position(pos).title(f.name))
+            mMap.addMarker(
+                MarkerOptions().position(pos).title(f.name)
+                    .icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_map_flower))
+            )
         }
     }
 
