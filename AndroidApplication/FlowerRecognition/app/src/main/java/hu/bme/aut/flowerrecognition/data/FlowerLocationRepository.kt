@@ -14,13 +14,13 @@ private const val TAG = "FlowrLoc Repo"
 
 class FlowerLocationRepository {
 
-    private var db : FirebaseFirestore = Firebase.firestore
+    private var db: FirebaseFirestore = Firebase.firestore
 
     private val _flowers = MutableLiveData<List<FlowerLocation>>()
-    val flowers : LiveData<List<FlowerLocation>> = _flowers
+    val flowers: LiveData<List<FlowerLocation>> = _flowers
 
 
-    fun addFlower(name : String, Lat: Double, Lng : Double){
+    fun addFlower(name: String, Lat: Double, Lng: Double) {
         val data = hashMapOf(
             "name" to name,
             "Lat" to Lat,
@@ -35,10 +35,11 @@ class FlowerLocationRepository {
                 Log.w(TAG, "Error adding document", e)
             }
     }
-    fun refresh(){
-       db.collection("flowers").get().addOnSuccessListener{
-               documents -> _flowers.postValue(documents.toObjects<FlowerLocation>())
-           }
+
+    fun refresh() {
+        db.collection("flowers").get().addOnSuccessListener { documents ->
+            _flowers.postValue(documents.toObjects<FlowerLocation>())
+        }
     }
 
 

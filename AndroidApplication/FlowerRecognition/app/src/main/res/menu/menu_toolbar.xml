@@ -6,14 +6,12 @@
         android:id="@+id/menu_recognizer"
         android:icon="@drawable/ic_camera"
         android:title="@string/recognizeFlower"
-        app:showAsAction="ifRoom">
-    </item>
+        app:showAsAction="ifRoom" />
 
     <item
         android:id="@+id/menu_map"
         android:icon="@drawable/ic_map"
         android:title="@string/map"
-        app:showAsAction="ifRoom">
-    </item>
+        app:showAsAction="ifRoom" />
 
 </menu>

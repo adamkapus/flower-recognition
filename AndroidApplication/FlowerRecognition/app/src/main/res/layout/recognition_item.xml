@@ -23,8 +23,8 @@
             android:layout_weight="2"
             android:padding="8dp"
             android:text="@{recognitionItem.label}"
-            android:textColor="@color/white"
             android:textAppearance="?attr/textAppearanceHeadline6"
+            android:textColor="@color/white"
             tools:text="Orange" />
 
         <TextView
@@ -35,8 +35,8 @@
             android:gravity="end"
             android:padding="8dp"
             android:text="@{recognitionItem.probabilityString}"
-            android:textColor="@color/white"
             android:textAppearance="?attr/textAppearanceHeadline6"
+            android:textColor="@color/white"
             tools:text="99%" />
 
     </LinearLayout>

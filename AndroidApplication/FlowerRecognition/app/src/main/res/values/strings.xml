@@ -1,4 +1,3 @@
-
 <resources>
     <string name="app_name">Flower recognition</string>
     <string name="permission_deny_camera_text">You cannot recognize flowers without the camera.</string>

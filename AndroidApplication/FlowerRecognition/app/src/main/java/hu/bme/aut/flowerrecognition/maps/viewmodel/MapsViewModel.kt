@@ -15,7 +15,7 @@ class MapsViewModel : ViewModel() {
 
     private val flowerLocRepo = FlowerRecognitionApplication.flowerLocationRepository
 
-    fun refresh(){
+    fun refresh() {
         flowerLocRepo.refresh()
     }
 

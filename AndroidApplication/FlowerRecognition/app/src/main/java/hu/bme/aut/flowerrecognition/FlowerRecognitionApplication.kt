@@ -6,7 +6,7 @@ import hu.bme.aut.flowerrecognition.data.FlowerLocationRepository
 class FlowerRecognitionApplication : Application() {
 
     companion object {
-            lateinit var flowerLocationRepository: FlowerLocationRepository
+        lateinit var flowerLocationRepository: FlowerLocationRepository
             private set
     }
 

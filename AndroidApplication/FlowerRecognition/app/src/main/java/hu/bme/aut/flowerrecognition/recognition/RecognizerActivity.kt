@@ -60,9 +60,10 @@ class RecognizerActivity : AppCompatActivity() {
 
         private const val TAG = "Recognizer Activity"
     }
-    private lateinit var binding : ActivityRecognizerBinding
-    private lateinit var submitButton : Button
-    private lateinit var startButton : Button
+
+    private lateinit var binding: ActivityRecognizerBinding
+    private lateinit var submitButton: Button
+    private lateinit var startButton: Button
 
     // CameraX variables
     private lateinit var preview: Preview // Preview use case, fast, responsive view of the camera
@@ -71,7 +72,6 @@ class RecognizerActivity : AppCompatActivity() {
     private val cameraExecutor = Executors.newSingleThreadExecutor()
 
     private lateinit var fusedLocationProviderClient: FusedLocationProviderClient
-
 
 
     private val recogViewModel: RecognitionViewModel by viewModels()
@@ -103,10 +103,16 @@ class RecognizerActivity : AppCompatActivity() {
 
         recogViewModel.stateOfRecognition.observe(this,
             Observer {
-                when(it){
-                    StateOfRecognition.READY_TO_START ->{ submitButton.isEnabled=false; startButton.isEnabled=true;}
-                    StateOfRecognition.IN_PROGRESS ->{ submitButton.isEnabled=false; startButton.isEnabled=false; startCamera()}
-                    StateOfRecognition.FINISHED ->{ submitButton.isEnabled=true; startButton.isEnabled=true; stopCamera()}
+                when (it) {
+                    StateOfRecognition.READY_TO_START -> {
+                        submitButton.isEnabled = false; startButton.isEnabled = true;
+                    }
+                    StateOfRecognition.IN_PROGRESS -> {
+                        submitButton.isEnabled = false; startButton.isEnabled = false; startCamera()
+                    }
+                    StateOfRecognition.FINISHED -> {
+                        submitButton.isEnabled = true; startButton.isEnabled = true; stopCamera()
+                    }
                 }
             }
         )
@@ -120,7 +126,6 @@ class RecognizerActivity : AppCompatActivity() {
         startButton.setOnClickListener {
             handleStartingRecognition()
         }
-
 
 
     }
@@ -151,40 +156,65 @@ class RecognizerActivity : AppCompatActivity() {
     private fun handleSubmittingFlower() {
         if (permissionGranted(arrayOf(Manifest.permission.ACCESS_FINE_LOCATION))) {
             submitFlower()
-        }
-        else if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.ACCESS_FINE_LOCATION)) {
+        } else if (ActivityCompat.shouldShowRequestPermissionRationale(
+                this,
+                Manifest.permission.ACCESS_FINE_LOCATION
+            )
+        ) {
             showRationaleDialog(
                 explanation = R.string.location_permission_submit_explanation,
-                onNegativeButton = {Toast.makeText(this, getString(R.string.permission_deny_location_submit_text), Toast.LENGTH_SHORT).show()},
-                onPositiveButton = { (this::requestPermission)(arrayOf(Manifest.permission.ACCESS_FINE_LOCATION), PERMISSIONS_ACCESS_FINE_LOCATION) }
+                onNegativeButton = {
+                    Toast.makeText(
+                        this,
+                        getString(R.string.permission_deny_location_submit_text),
+                        Toast.LENGTH_SHORT
+                    ).show()
+                },
+                onPositiveButton = {
+                    (this::requestPermission)(
+                        arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
+                        PERMISSIONS_ACCESS_FINE_LOCATION
+                    )
+                }
             )
 
+        } else {
+            requestPermission(
+                arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
+                PERMISSIONS_ACCESS_FINE_LOCATION
+            )
         }
-
-        else {
-            requestPermission(arrayOf(Manifest.permission.ACCESS_FINE_LOCATION), PERMISSIONS_ACCESS_FINE_LOCATION)
-        }
-
 
 
     }
 
 
-    private fun handleStartingRecognition(){
+    private fun handleStartingRecognition() {
         if (permissionGranted(arrayOf(Manifest.permission.CAMERA))) {
             recogViewModel.startRecognition()
-        }
-
-        else if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.CAMERA)) {
+        } else if (ActivityCompat.shouldShowRequestPermissionRationale(
+                this,
+                Manifest.permission.CAMERA
+            )
+        ) {
             showRationaleDialog(
                 explanation = R.string.camera_permission_explanation,
-                onNegativeButton = {Toast.makeText(this, getString(R.string.permission_deny_camera_text), Toast.LENGTH_SHORT).show()},
-                onPositiveButton = { (this::requestPermission)(arrayOf(Manifest.permission.CAMERA), PERMISSIONS_REQUEST_CAMERA) }
+                onNegativeButton = {
+                    Toast.makeText(
+                        this,
+                        getString(R.string.permission_deny_camera_text),
+                        Toast.LENGTH_SHORT
+                    ).show()
+                },
+                onPositiveButton = {
+                    (this::requestPermission)(
+                        arrayOf(Manifest.permission.CAMERA),
+                        PERMISSIONS_REQUEST_CAMERA
+                    )
+                }
             )
 
-        }
-
-        else {
+        } else {
             requestPermission(arrayOf(Manifest.permission.CAMERA), PERMISSIONS_REQUEST_CAMERA)
         }
     }
@@ -214,11 +244,11 @@ class RecognizerActivity : AppCompatActivity() {
         alertDialog.show()
     }
 
-    private fun requestPermission(permission : Array<String>, requestCode: Int){
+    private fun requestPermission(permission: Array<String>, requestCode: Int) {
         ActivityCompat.requestPermissions(
             this,
             permission,
-           requestCode
+            requestCode
         )
     }
 
@@ -248,8 +278,7 @@ class RecognizerActivity : AppCompatActivity() {
             PERMISSIONS_ACCESS_FINE_LOCATION -> {
                 if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     submitFlower()
-                }
-                else {
+                } else {
                     Toast.makeText(
                         this,
                         getString(R.string.permission_deny_location_submit_text),
@@ -262,7 +291,7 @@ class RecognizerActivity : AppCompatActivity() {
     }
 
     @SuppressLint("MissingPermission")
-    private fun submitFlower(){
+    private fun submitFlower() {
         val locationResult = fusedLocationProviderClient.lastLocation
         locationResult.addOnCompleteListener(this) { task ->
             if (task.isSuccessful) {
@@ -270,8 +299,7 @@ class RecognizerActivity : AppCompatActivity() {
                 if (location != null) {
                     recogViewModel.submitFlower(location.latitude, location.longitude)
                 }
-            }
-            else {
+            } else {
                 Log.d(TAG, "Current location is null.")
             }
         }
@@ -336,7 +364,7 @@ class RecognizerActivity : AppCompatActivity() {
         }, ContextCompat.getMainExecutor(this))
     }
 
-    private fun stopCamera(){
+    private fun stopCamera() {
         val cameraProviderFuture = ProcessCameraProvider.getInstance(this)
         val cameraProvider: ProcessCameraProvider = cameraProviderFuture.get()
         cameraProvider.unbindAll()
@@ -346,11 +374,11 @@ class RecognizerActivity : AppCompatActivity() {
         ImageAnalysis.Analyzer {
 
 
-        private val flowerModel: ConvModMetaScaleokes by lazy{
+        private val flowerModel: ConvModMetaScaleokes by lazy {
 
             val compatList = CompatibilityList()
 
-            val options = if(compatList.isDelegateSupportedOnThisDevice) {
+            val options = if (compatList.isDelegateSupportedOnThisDevice) {
                 Log.d(TAG, "This device is GPU Compatible ")
                 Model.Options.Builder().setDevice(Model.Device.GPU).build()
             } else {
