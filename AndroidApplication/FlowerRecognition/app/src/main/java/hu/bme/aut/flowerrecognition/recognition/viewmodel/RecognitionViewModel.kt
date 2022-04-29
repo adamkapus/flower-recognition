@@ -6,7 +6,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import hu.bme.aut.flowerrecognition.data.FlowerLocationRepository
 
-private const val MAX_ANALYSIS_ROUNDS = 100
+private const val MAX_ANALYSIS_ROUNDS = 10
 private const val MAX_DISPLAYED_RECOGNITIONS = 5
 
 class RecognitionViewModel : ViewModel() {
@@ -18,6 +18,8 @@ class RecognitionViewModel : ViewModel() {
     private val cumulatedRecognitions  = mutableListOf<Recognition>()
     private val _recognitionList = MutableLiveData<List<Recognition>>()
     val recognitionList: LiveData<List<Recognition>> = _recognitionList
+
+    private val flowerLocRepo = FlowerLocationRepository()
 
     fun addRecognition(newRecognitions: List<Recognition>){
         numberOfAnalysisRounds++
@@ -56,13 +58,10 @@ class RecognitionViewModel : ViewModel() {
         _stateofrecognition.postValue(StateOfRecognition.FINISHED)
     }
 
-    fun submitFlower(/*name: String, */){
+    fun submitFlower(Lat: Double, Lng: Double){
         val flowerName = cumulatedRecognitions.sortedByDescending { it.confidence }[0].label
-        val position = 0;
-
-        //val test =  FlowerLocationRepository()
-        //test.refresh()
-
+        flowerLocRepo.addFlower(flowerName, Lat, Lng)
+        _stateofrecognition.postValue(StateOfRecognition.READY_TO_START)
     }
 
 }

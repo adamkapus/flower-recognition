@@ -1,7 +1,7 @@
 
 <resources>
     <string name="app_name">Flower recognition</string>
-    <string name="permission_deny_text">You cannot recognize flowers without the camera.</string>
+    <string name="permission_deny_camera_text">You cannot recognize flowers without the camera.</string>
     <string name="tensorflow_lite_logo_description">TensorFlow Lite logo</string>
     <string name="launch_recognizer">Recognize</string>
     <string name="launch_map">View map</string>
@@ -11,5 +11,7 @@
     <string name="rationale_dialog_title">Why we need this permission</string>
     <string name="proceed">OK</string>
     <string name="exit">Exit</string>
-    <string name="contacts_permission_explanation">We need access to the camera image to perform image analysis.</string>
+    <string name="camera_permission_explanation">We need access to the camera image to perform image analysis.</string>
+    <string name="location_permission_submit_explanation">We need to access your position to place the flower on the map at it\'s position.</string>
+    <string name="permission_deny_location_submit_text">We cannot submit a flower without it\'s position.</string>
 </resources>

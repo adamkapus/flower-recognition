@@ -28,6 +28,8 @@ import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.Observer
+import com.google.android.gms.location.FusedLocationProviderClient
+import com.google.android.gms.location.LocationServices
 import hu.bme.aut.flowerrecognition.R
 import hu.bme.aut.flowerrecognition.databinding.ActivityRecognizerBinding
 import hu.bme.aut.flowerrecognition.maps.MapsActivity
@@ -68,6 +70,8 @@ class RecognizerActivity : AppCompatActivity() {
     private lateinit var camera: Camera
     private val cameraExecutor = Executors.newSingleThreadExecutor()
 
+    private lateinit var fusedLocationProviderClient: FusedLocationProviderClient
+
 
 
     private val recogViewModel: RecognitionViewModel by viewModels()
@@ -82,6 +86,7 @@ class RecognizerActivity : AppCompatActivity() {
         submitButton = binding.submitButton
         startButton = binding.startCameraButton
 
+        fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this)
 
         val viewAdapter = RecognitionAdapter(this)
         binding.recognitionResults.adapter = viewAdapter
@@ -108,13 +113,12 @@ class RecognizerActivity : AppCompatActivity() {
 
         val stopButton: Button = findViewById(R.id.submit_button)
         stopButton.setOnClickListener {
-            recogViewModel.submitFlower()
+            handleSubmittingFlower()
         }
 
         val startButton: Button = findViewById(R.id.start_camera_button)
         startButton.setOnClickListener {
-            //recogViewModel.startRecognition()
-            handleCameraPermission()
+            handleStartingRecognition()
         }
 
 
@@ -144,16 +148,37 @@ class RecognizerActivity : AppCompatActivity() {
         }
     }
 
+    private fun handleSubmittingFlower() {
+        if (permissionGranted(arrayOf(Manifest.permission.ACCESS_FINE_LOCATION))) {
+            submitFlower()
+        }
+        else if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.ACCESS_FINE_LOCATION)) {
+            showRationaleDialog(
+                explanation = R.string.location_permission_submit_explanation,
+                onNegativeButton = {Toast.makeText(this, getString(R.string.permission_deny_location_submit_text), Toast.LENGTH_SHORT).show()},
+                onPositiveButton = { (this::requestPermission)(arrayOf(Manifest.permission.ACCESS_FINE_LOCATION), PERMISSIONS_ACCESS_FINE_LOCATION) }
+            )
 
-    private fun handleCameraPermission(){
+        }
+
+        else {
+            requestPermission(arrayOf(Manifest.permission.ACCESS_FINE_LOCATION), PERMISSIONS_ACCESS_FINE_LOCATION)
+        }
+
+
+
+    }
+
+
+    private fun handleStartingRecognition(){
         if (permissionGranted(arrayOf(Manifest.permission.CAMERA))) {
             recogViewModel.startRecognition()
         }
 
         else if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.CAMERA)) {
             showRationaleDialog(
-                explanation = R.string.contacts_permission_explanation,
-                onNegativeButton = {Toast.makeText(this, getString(R.string.permission_deny_text), Toast.LENGTH_SHORT).show()},
+                explanation = R.string.camera_permission_explanation,
+                onNegativeButton = {Toast.makeText(this, getString(R.string.permission_deny_camera_text), Toast.LENGTH_SHORT).show()},
                 onPositiveButton = { (this::requestPermission)(arrayOf(Manifest.permission.CAMERA), PERMISSIONS_REQUEST_CAMERA) }
             )
 
@@ -212,12 +237,42 @@ class RecognizerActivity : AppCompatActivity() {
                 } else {
                     Toast.makeText(
                         this,
-                        getString(R.string.permission_deny_text),
+                        getString(R.string.permission_deny_camera_text),
                         Toast.LENGTH_SHORT
                     ).show()
                     //finish()
                 }
                 return
+            }
+
+            PERMISSIONS_ACCESS_FINE_LOCATION -> {
+                if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    submitFlower()
+                }
+                else {
+                    Toast.makeText(
+                        this,
+                        getString(R.string.permission_deny_location_submit_text),
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
+                return
+            }
+        }
+    }
+
+    @SuppressLint("MissingPermission")
+    private fun submitFlower(){
+        val locationResult = fusedLocationProviderClient.lastLocation
+        locationResult.addOnCompleteListener(this) { task ->
+            if (task.isSuccessful) {
+                val location = task.result
+                if (location != null) {
+                    recogViewModel.submitFlower(location.latitude, location.longitude)
+                }
+            }
+            else {
+                Log.d(TAG, "Current location is null.")
             }
         }
     }

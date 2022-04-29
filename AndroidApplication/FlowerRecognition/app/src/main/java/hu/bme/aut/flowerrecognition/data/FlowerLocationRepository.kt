@@ -20,11 +20,11 @@ class FlowerLocationRepository {
     val flowers : LiveData<List<FlowerLocation>> = _flowers
 
 
-    fun addFlower(){
+    fun addFlower(name : String, Lat: Double, Lng : Double){
         val data = hashMapOf(
-            "name" to "tulip",
-            "Lat" to 123.45,
-            "Lng" to 789.789
+            "name" to name,
+            "Lat" to Lat,
+            "Lng" to Lng
         )
         db.collection("flowers")
             .add(data)
@@ -36,7 +36,6 @@ class FlowerLocationRepository {
             }
     }
     fun refresh(){
-        //addFlower()
        db.collection("flowers").get().addOnSuccessListener{
                documents -> _flowers.postValue(documents.toObjects<FlowerLocation>())
            }
