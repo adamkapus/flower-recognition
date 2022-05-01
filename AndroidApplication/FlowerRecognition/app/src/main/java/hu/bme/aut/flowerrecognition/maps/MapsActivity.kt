@@ -127,10 +127,11 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnInfoWi
     private fun drawFlowersOnMap(flowers: List<FlowerLocation>) {
         for (f in flowers) {
             val pos = LatLng(f.Lat!!.toDouble(), f.Lng!!.toDouble())
-            mMap.addMarker(
+            val marker = mMap.addMarker(
                 MarkerOptions().position(pos).title(f.name)
                     .icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_map_flower))
             )
+            marker?.tag = f.imageUrl
         }
     }
 
@@ -160,7 +161,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnInfoWi
     }
 
     override fun onInfoWindowClick(marker: Marker) {
-        DialogFlowerImage().show(
+        DialogFlowerImage.newInstance("szep nev", marker.tag as String?).show(
             supportFragmentManager, DialogFlowerImage::class.java.simpleName
         )
     }

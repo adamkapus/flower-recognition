@@ -5,7 +5,6 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ktx.firestore
-import com.google.firebase.firestore.ktx.toObject
 import com.google.firebase.firestore.ktx.toObjects
 import com.google.firebase.ktx.Firebase
 import hu.bme.aut.flowerrecognition.data.model.FlowerLocation
@@ -20,11 +19,12 @@ class FlowerLocationRepository {
     val flowers: LiveData<List<FlowerLocation>> = _flowers
 
 
-    fun addFlower(name: String, Lat: Double, Lng: Double) {
+    fun addFlower(name: String, Lat: Double, Lng: Double, imageURL: String?) {
         val data = hashMapOf(
             "name" to name,
             "Lat" to Lat,
-            "Lng" to Lng
+            "Lng" to Lng,
+            "imageUrl" to imageURL
         )
         db.collection("flowers")
             .add(data)

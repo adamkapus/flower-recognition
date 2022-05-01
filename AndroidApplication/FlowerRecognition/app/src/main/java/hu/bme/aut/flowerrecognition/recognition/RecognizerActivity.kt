@@ -19,17 +19,14 @@ import androidx.activity.viewModels
 import androidx.annotation.StringRes
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
-import androidx.camera.core.Camera
-import androidx.camera.core.CameraSelector
-import androidx.camera.core.ImageAnalysis
-import androidx.camera.core.ImageProxy
-import androidx.camera.core.Preview
+import androidx.camera.core.*
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.Observer
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
+import com.google.firebase.storage.FirebaseStorage
 import hu.bme.aut.flowerrecognition.R
 import hu.bme.aut.flowerrecognition.databinding.ActivityRecognizerBinding
 import hu.bme.aut.flowerrecognition.maps.MapsActivity
@@ -39,10 +36,13 @@ import hu.bme.aut.flowerrecognition.recognition.util.YuvToRgbConverter
 import hu.bme.aut.flowerrecognition.recognition.viewmodel.Recognition
 import hu.bme.aut.flowerrecognition.recognition.viewmodel.RecognitionViewModel
 import hu.bme.aut.flowerrecognition.recognition.viewmodel.StateOfRecognition
+import org.tensorflow.lite.gpu.CompatibilityList
 import org.tensorflow.lite.support.image.TensorImage
 import org.tensorflow.lite.support.model.Model
+import java.io.ByteArrayOutputStream
+import java.net.URLEncoder
+import java.util.*
 import java.util.concurrent.Executors
-import org.tensorflow.lite.gpu.CompatibilityList
 
 // Listener for the result of the ImageAnalyzer
 typealias RecognitionListener = (recognition: List<Recognition>) -> Unit
@@ -155,7 +155,7 @@ class RecognizerActivity : AppCompatActivity() {
 
     private fun handleSubmittingFlower() {
         if (permissionGranted(arrayOf(Manifest.permission.ACCESS_FINE_LOCATION))) {
-            submitFlower()
+            uploadFlowerImage()
         } else if (ActivityCompat.shouldShowRequestPermissionRationale(
                 this,
                 Manifest.permission.ACCESS_FINE_LOCATION
@@ -290,14 +290,52 @@ class RecognizerActivity : AppCompatActivity() {
         }
     }
 
+    private fun uploadFlowerImage(){
+        val bitmap: Bitmap? = binding.viewFinder.bitmap
+
+        if(bitmap == null) {
+            submitFlower()
+        }
+
+        val baos = ByteArrayOutputStream()
+        bitmap!!.compress(Bitmap.CompressFormat.JPEG, 100, baos)
+        val imageInBytes = baos.toByteArray()
+
+        val storageReference = FirebaseStorage.getInstance().reference
+        val newImageName = URLEncoder.encode(UUID.randomUUID().toString(), "UTF-8") + ".jpg"
+        val newImageRef = storageReference.child("images/$newImageName")
+
+        newImageRef.putBytes(imageInBytes)
+            .addOnFailureListener { _ ->
+                Toast.makeText(
+                    this,
+                    getString(R.string.unsuccesful_image_upload),
+                    Toast.LENGTH_SHORT
+                ).show()
+            }
+            .continueWithTask { task ->
+                if (!task.isSuccessful) {
+                    task.exception?.let { throw it }
+                }
+
+                newImageRef.downloadUrl
+            }
+            .addOnSuccessListener { downloadUri ->
+                submitFlower(downloadUri.toString())
+            }
+    }
+
+
     @SuppressLint("MissingPermission")
-    private fun submitFlower() {
+    private fun submitFlower(imageURL: String? = null) {
+
+
         val locationResult = fusedLocationProviderClient.lastLocation
         locationResult.addOnCompleteListener(this) { task ->
             if (task.isSuccessful) {
                 val location = task.result
                 if (location != null) {
-                    recogViewModel.submitFlower(location.latitude, location.longitude)
+                    recogViewModel.submitFlower(location.latitude, location.longitude, imageURL)
                 }
             } else {
                 Log.d(TAG, "Current location is null.")

@@ -13,4 +13,5 @@
     <string name="camera_permission_explanation">We need access to the camera image to perform image analysis.</string>
     <string name="location_permission_submit_explanation">We need to access your position to place the flower on the map at it\'s position.</string>
     <string name="permission_deny_location_submit_text">We cannot submit a flower without it\'s position.</string>
+    <string name="unsuccesful_image_upload">Image upload failed</string>
 </resources>
