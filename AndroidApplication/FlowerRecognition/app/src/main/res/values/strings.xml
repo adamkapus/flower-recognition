@@ -18,4 +18,7 @@
     <string name="flower_name_default">Flower</string>
     <string name="flower_name_snowdrop">Hóvirág</string>
     <string name="flower_name_sunflower">Napraforgó</string>
+
+    <string name="lat_lng">Latitude: %1$s Longitude: %2$s</string>
+    <string name="view_picture">View picture</string>
 </resources>

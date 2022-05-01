@@ -4,6 +4,7 @@ import android.Manifest
 import android.annotation.SuppressLint
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.graphics.Paint
 import android.location.Location
 import android.os.Bundle
 import android.util.Log
@@ -152,7 +153,6 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnInfoWi
 
         private val window: View = layoutInflater.inflate(R.layout.flower_info_window, null)
 
-
         override fun getInfoContents(marker: Marker): View? {
             return null
         }
@@ -168,7 +168,12 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnInfoWi
             titleUi.text = title
 
             val snippetUi = view.findViewById<TextView>(R.id.snippet)
-            snippetUi.text = "click here"
+            val lat = String.format("%.3f", markers[marker]?.Lat)
+            val lng = String.format("%.3f", markers[marker]?.Lng)
+            snippetUi.text = getString(R.string.lat_lng, lat, lng)
+
+            val viewImagetv = view.findViewById<TextView>(R.id.view_image_tv)
+            viewImagetv.paintFlags = Paint.UNDERLINE_TEXT_FLAG
         }
 
     }
