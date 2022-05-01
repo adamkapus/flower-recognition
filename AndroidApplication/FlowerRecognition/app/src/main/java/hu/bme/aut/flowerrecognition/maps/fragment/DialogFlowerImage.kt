@@ -59,7 +59,7 @@ class DialogFlowerImage : AppCompatDialogFragment() {
 
     companion object {
         @JvmStatic
-        fun newInstance(flowerName: String, imageURI: String?) =
+        fun newInstance(flowerName: String?, imageURI: String?) =
             DialogFlowerImage().apply {
                 arguments = Bundle().apply {
                     putString(ARG_PARAM1, flowerName)

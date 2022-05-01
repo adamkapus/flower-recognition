@@ -52,6 +52,8 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnInfoWi
     private var lastKnownLocation: Location? = null
     private val defaultLocation = LatLng(-90.0, 90.0)
 
+    private var markers = HashMap<Marker, FlowerLocation>()
+
     private val mapsViewModel: MapsViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -131,7 +133,9 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnInfoWi
                 MarkerOptions().position(pos).title(f.name)
                     .icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_map_flower))
             )
-            marker?.tag = f.imageUrl
+            if (marker != null) {
+                markers[marker] = f
+            }
         }
     }
 
@@ -161,7 +165,9 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnInfoWi
     }
 
     override fun onInfoWindowClick(marker: Marker) {
-        DialogFlowerImage.newInstance("szep nev", marker.tag as String?).show(
+        val flowerName = markers[marker]?.name
+        val imageUrl = markers[marker]?.imageUrl
+        DialogFlowerImage.newInstance(flowerName, imageUrl).show(
             supportFragmentManager, DialogFlowerImage::class.java.simpleName
         )
     }
