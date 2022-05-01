@@ -14,4 +14,8 @@
     <string name="location_permission_submit_explanation">We need to access your position to place the flower on the map at it\'s position.</string>
     <string name="permission_deny_location_submit_text">We cannot submit a flower without it\'s position.</string>
     <string name="unsuccesful_image_upload">Image upload failed</string>
+
+    <string name="flower_name_default">Flower</string>
+    <string name="flower_name_snowdrop">Hóvirág</string>
+    <string name="flower_name_sunflower">Napraforgó</string>
 </resources>

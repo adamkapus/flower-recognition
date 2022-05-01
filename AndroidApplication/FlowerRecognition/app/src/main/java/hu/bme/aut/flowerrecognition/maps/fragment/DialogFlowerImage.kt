@@ -9,20 +9,20 @@ import androidx.appcompat.app.AppCompatDialogFragment
 import com.bumptech.glide.Glide
 import hu.bme.aut.flowerrecognition.databinding.DialogFlowerImageBinding
 
-private const val ARG_PARAM1 = "flowerName"
+private const val ARG_PARAM1 = "displayName"
 private const val ARG_PARAM2 = "imageURI"
 
 class DialogFlowerImage : AppCompatDialogFragment() {
     private lateinit var binding: DialogFlowerImageBinding
 
-    private var flowerName: String? = null
+    private var displayName: String? = null
     private var imageURI: String? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setStyle(STYLE_NO_TITLE, 0)
         arguments?.let {
-            flowerName = it.getString(ARG_PARAM1)
+            displayName = it.getString(ARG_PARAM1)
             imageURI = it.getString(ARG_PARAM2)
         }
     }
@@ -37,7 +37,7 @@ class DialogFlowerImage : AppCompatDialogFragment() {
         savedInstanceState: Bundle?
     ): View {
 
-        binding.flowerImageName.text = flowerName
+        binding.flowerImageName.text = displayName
 
         if (imageURI != null) {
             context?.let {

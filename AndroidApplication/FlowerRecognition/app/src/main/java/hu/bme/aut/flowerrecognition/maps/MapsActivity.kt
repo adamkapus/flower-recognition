@@ -31,8 +31,10 @@ import hu.bme.aut.flowerrecognition.R
 import hu.bme.aut.flowerrecognition.data.model.FlowerLocation
 import hu.bme.aut.flowerrecognition.databinding.ActivityMapsBinding
 import hu.bme.aut.flowerrecognition.maps.fragment.DialogFlowerImage
+import hu.bme.aut.flowerrecognition.maps.model.FlowerOnMap
 import hu.bme.aut.flowerrecognition.maps.viewmodel.MapsViewModel
 import hu.bme.aut.flowerrecognition.recognition.RecognizerActivity
+import hu.bme.aut.flowerrecognition.util.FlowerResolver
 
 
 //private const val REQUEST_CODE_PERMISSIONS = 999 // Return code after asking for permission
@@ -52,7 +54,8 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnInfoWi
     private var lastKnownLocation: Location? = null
     private val defaultLocation = LatLng(-90.0, 90.0)
 
-    private var markers = HashMap<Marker, FlowerLocation>()
+    private var markers = HashMap<Marker, FlowerOnMap>()
+    private var flowerResolver = FlowerResolver()
 
     private val mapsViewModel: MapsViewModel by viewModels()
 
@@ -134,7 +137,13 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnInfoWi
                     .icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_map_flower))
             )
             if (marker != null) {
-                markers[marker] = f
+                markers[marker] = FlowerOnMap(
+                    f.name,
+                    f.Lat,
+                    f.Lng,
+                    f.imageUrl,
+                    getString(flowerResolver.getDisplayName(f.name))
+                )
             }
         }
     }
@@ -154,7 +163,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnInfoWi
         }
 
         private fun render(marker: Marker, view: View) {
-            val title: String? = marker.title
+            val title: String? = markers[marker]?.displayName
             val titleUi = view.findViewById<TextView>(R.id.title)
             titleUi.text = title
 
@@ -165,7 +174,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnInfoWi
     }
 
     override fun onInfoWindowClick(marker: Marker) {
-        val flowerName = markers[marker]?.name
+        val flowerName = markers[marker]?.displayName
         val imageUrl = markers[marker]?.imageUrl
         DialogFlowerImage.newInstance(flowerName, imageUrl).show(
             supportFragmentManager, DialogFlowerImage::class.java.simpleName
