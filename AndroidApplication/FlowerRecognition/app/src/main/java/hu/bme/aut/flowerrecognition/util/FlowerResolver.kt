@@ -27,6 +27,9 @@ class FlowerResolver {
 
         flowerDisplayNameMap["daisy"] = R.string.flower_name_daisy
         flowerRarityMap["daisy"] = Rarity.COMMON
+
+        flowerDisplayNameMap["crocus"] = R.string.flower_name_crocus
+        flowerRarityMap["crocus"] = Rarity.SUPER_RARE
     }
 
     fun getDisplayName(label: String?): Int {

@@ -8,10 +8,13 @@ import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.firestore.ktx.toObjects
 import com.google.firebase.ktx.Firebase
 import hu.bme.aut.flowerrecognition.data.model.FlowerLocation
+import hu.bme.aut.flowerrecognition.util.FlowerResolver
 
 private const val TAG = "FlowrLoc Repo"
 
 class FlowerLocationRepository {
+
+    private var flowerResolver = FlowerResolver()
 
     private var db: FirebaseFirestore = Firebase.firestore
 
@@ -24,7 +27,8 @@ class FlowerLocationRepository {
             "name" to name,
             "Lat" to Lat,
             "Lng" to Lng,
-            "imageUrl" to imageURL
+            "imageUrl" to imageURL,
+            "rarity" to flowerResolver.getRarity(name).toString()
         )
         db.collection("flowers")
             .add(data)

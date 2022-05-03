@@ -4,5 +4,6 @@ data class FlowerLocation(
     val name: String? = null,
     val Lat: Float? = null,
     val Lng: Float? = null,
-    val imageUrl: String? = null
+    val imageUrl: String? = null,
+    val rarity: String? = null
 )

@@ -5,6 +5,7 @@ import android.annotation.SuppressLint
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Paint
+import android.graphics.drawable.Drawable
 import android.location.Location
 import android.os.Bundle
 import android.util.Log
@@ -29,7 +30,6 @@ import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.Marker
 import com.google.android.gms.maps.model.MarkerOptions
-import com.google.android.material.snackbar.Snackbar
 import hu.bme.aut.flowerrecognition.R
 import hu.bme.aut.flowerrecognition.data.model.FlowerLocation
 import hu.bme.aut.flowerrecognition.databinding.ActivityMapsBinding
@@ -179,20 +179,35 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnInfoWi
         markers.clear()
 
         for (f in flowers) {
+
             val pos = LatLng(f.Lat!!.toDouble(), f.Lng!!.toDouble())
+
+            val icon: Int = when (f.rarity) {
+                Rarity.COMMON.toString() -> R.drawable.ic_map_flower_common
+                Rarity.RARE.toString() -> R.drawable.ic_map_flower_rare
+                Rarity.SUPER_RARE.toString() -> R.drawable.ic_map_flower_super_rare
+                else -> {
+                    R.drawable.ic_map_flower_common
+                }
+            }
+
             val marker = mMap.addMarker(
                 MarkerOptions().position(pos).title(f.name)
-                    .icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_map_flower))
+                    .icon(BitmapDescriptorFactory.fromResource(icon))
             )
             if (marker != null) {
-                val flowerRarity = flowerResolver.getRarity(f.name)
+                val rarity: Rarity = if (f.rarity == null) {
+                    Rarity.COMMON
+                } else {
+                    Rarity.valueOf(f.rarity)
+                }
                 markers[marker] = FlowerOnMap(
-                    f.name,
-                    f.Lat,
-                    f.Lng,
-                    f.imageUrl,
-                    getString(flowerResolver.getDisplayName(f.name)),
-                    rarity = flowerRarity
+                    name = f.name,
+                    Lat = f.Lat,
+                    Lng = f.Lng,
+                    imageUrl = f.imageUrl,
+                    displayName = getString(flowerResolver.getDisplayName(f.name)),
+                    rarity = rarity
                 )
             }
         }
