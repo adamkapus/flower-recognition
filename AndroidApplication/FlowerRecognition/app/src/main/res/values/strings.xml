@@ -21,4 +21,5 @@
 
     <string name="lat_lng">Latitude: %1$s Longitude: %2$s</string>
     <string name="view_picture">View picture</string>
+    <string name="description_refresh_map">Refresh map</string>
 </resources>

@@ -28,6 +28,7 @@ import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.Marker
 import com.google.android.gms.maps.model.MarkerOptions
+import com.google.android.material.snackbar.Snackbar
 import hu.bme.aut.flowerrecognition.R
 import hu.bme.aut.flowerrecognition.data.model.FlowerLocation
 import hu.bme.aut.flowerrecognition.databinding.ActivityMapsBinding
@@ -75,6 +76,9 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnInfoWi
 
         title = "Map"
 
+        binding.fabRefresh.setOnClickListener { _ ->
+            mapsViewModel.refresh()
+        }
 
     }
 
@@ -131,6 +135,11 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnInfoWi
     }
 
     private fun drawFlowersOnMap(flowers: List<FlowerLocation>) {
+        for (m in markers.keys) {
+            m.remove()
+        }
+        markers.clear()
+
         for (f in flowers) {
             val pos = LatLng(f.Lat!!.toDouble(), f.Lng!!.toDouble())
             val marker = mMap.addMarker(
