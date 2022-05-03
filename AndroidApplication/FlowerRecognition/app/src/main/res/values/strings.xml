@@ -22,4 +22,15 @@
     <string name="lat_lng">Latitude: %1$s Longitude: %2$s</string>
     <string name="view_picture">View picture</string>
     <string name="description_refresh_map">Refresh map</string>
+    <string name="chechbox_common">Common</string>
+    <string name="checkbox_rare">Rare</string>
+    <string name="rarity_common">Gyakori</string>
+    <string name="rarity_rare">Ritka</string>
+    <string name="rarity_super_rare">Szuper ritka</string>
+    <string name="rarity_default">Ritkaság</string>
+    <string name="flower_name_dandelion">Pitypang</string>
+    <string name="flower_name_tulip">Tulipán</string>
+    <string name="flower_name_pansy">Árvácska</string>
+    <string name="flower_name_iris">Nőszirom</string>
+    <string name="flower_name_daisy">Százszorszép</string>
 </resources>

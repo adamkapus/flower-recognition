@@ -12,6 +12,7 @@ import android.view.Menu
 import android.view.MenuInflater
 import android.view.MenuItem
 import android.view.View
+import android.widget.CheckBox
 import android.widget.TextView
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
@@ -37,6 +38,7 @@ import hu.bme.aut.flowerrecognition.maps.model.FlowerOnMap
 import hu.bme.aut.flowerrecognition.maps.viewmodel.MapsViewModel
 import hu.bme.aut.flowerrecognition.recognition.RecognizerActivity
 import hu.bme.aut.flowerrecognition.util.FlowerResolver
+import hu.bme.aut.flowerrecognition.util.Rarity
 
 
 //private const val REQUEST_CODE_PERMISSIONS = 999 // Return code after asking for permission
@@ -80,10 +82,39 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnInfoWi
             mapsViewModel.refresh()
         }
 
+        binding.checkboxCommon.setOnClickListener { view ->
+            if (view is CheckBox) onCheckBoxClick(
+                Rarity.COMMON,
+                view.isChecked
+            )
+        }
+        binding.checkboxRare.setOnClickListener { view ->
+            if (view is CheckBox) onCheckBoxClick(
+                Rarity.RARE,
+                view.isChecked
+            )
+        }
+        binding.checkboxSuperRare.setOnClickListener { view ->
+            if (view is CheckBox) onCheckBoxClick(
+                Rarity.SUPER_RARE,
+                view.isChecked
+            )
+        }
+
+        mapsViewModel.viewableRarities.observe(this,
+            Observer {
+                onViewableRaritiesChanged(it)
+            }
+        )
+
     }
 
-    override fun onCreateOptionsMenu(menu: Menu): Boolean {
+    private fun onCheckBoxClick(rarity: Rarity, isChecked: Boolean) {
+        mapsViewModel.modifyRarities(rarity, isChecked)
+    }
 
+
+    override fun onCreateOptionsMenu(menu: Menu): Boolean {
         val inflater: MenuInflater = menuInflater
         inflater.inflate(R.menu.menu_toolbar, menu)
         return true
@@ -119,7 +150,6 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnInfoWi
 
         mapsViewModel.getFlowersLiveData().observe(this,
             Observer {
-                //viewAdapter.submitList(it)
                 Log.d(TAG, it.toString())
                 drawFlowersOnMap(it)
             }
@@ -132,6 +162,14 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnInfoWi
         getDeviceLocation()
         Log.d(TAG, "meghivva")
         mapsViewModel.refresh()
+    }
+
+
+    private fun onViewableRaritiesChanged(viewableRarities: Set<Rarity>) {
+        for (m in markers.entries) {
+            val f = m.value
+            m.key.isVisible = viewableRarities.contains(f.rarity)
+        }
     }
 
     private fun drawFlowersOnMap(flowers: List<FlowerLocation>) {
@@ -147,15 +185,19 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnInfoWi
                     .icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_map_flower))
             )
             if (marker != null) {
+                val flowerRarity = flowerResolver.getRarity(f.name)
                 markers[marker] = FlowerOnMap(
                     f.name,
                     f.Lat,
                     f.Lng,
                     f.imageUrl,
-                    getString(flowerResolver.getDisplayName(f.name))
+                    getString(flowerResolver.getDisplayName(f.name)),
+                    rarity = flowerRarity
                 )
             }
         }
+
+        mapsViewModel.viewableRarities.value?.let { onViewableRaritiesChanged(it) }
     }
 
     internal inner class FlowerInfoWindowAdapter : GoogleMap.InfoWindowAdapter {
