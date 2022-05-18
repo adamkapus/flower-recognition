@@ -2,6 +2,7 @@ package hu.bme.aut.flowerrecognition.recognition
 
 import android.Manifest
 import android.annotation.SuppressLint
+import android.app.ProgressDialog
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -305,8 +306,11 @@ class RecognizerActivity : AppCompatActivity() {
         val newImageName = URLEncoder.encode(UUID.randomUUID().toString(), "UTF-8") + ".jpg"
         val newImageRef = storageReference.child("images/$newImageName")
 
+        showProgressDialog()
+
         newImageRef.putBytes(imageInBytes)
             .addOnFailureListener { _ ->
+                hideProgressDialog()
                 Toast.makeText(
                     this,
                     getString(R.string.unsuccesful_image_upload),
@@ -321,6 +325,7 @@ class RecognizerActivity : AppCompatActivity() {
                 newImageRef.downloadUrl
             }
             .addOnSuccessListener { downloadUri ->
+                hideProgressDialog()
                 submitFlower(downloadUri.toString())
             }
     }
@@ -461,7 +466,7 @@ class RecognizerActivity : AppCompatActivity() {
         private lateinit var bitmapBuffer: Bitmap
         private lateinit var rotationMatrix: Matrix
 
-        @SuppressLint("UnsafeExperimentalUsageError")
+        @SuppressLint("UnsafeExperimentalUsageError", "UnsafeOptInUsageError")
         private fun toBitmap(imageProxy: ImageProxy): Bitmap? {
 
             val image = imageProxy.image ?: return null
@@ -492,6 +497,29 @@ class RecognizerActivity : AppCompatActivity() {
             )
         }
 
+    }
+
+    private var progressDialog: ProgressDialog? = null
+
+    fun showProgressDialog() {
+        if (progressDialog != null) {
+            return
+        }
+
+        progressDialog = ProgressDialog(this).apply {
+            setCancelable(false)
+            setMessage("Uploading image...")
+            show()
+        }
+    }
+
+    protected fun hideProgressDialog() {
+        progressDialog?.let { dialog ->
+            if (dialog.isShowing) {
+                dialog.dismiss()
+            }
+        }
+        progressDialog = null
     }
 
 }
