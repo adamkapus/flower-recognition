@@ -34,4 +34,13 @@
     <string name="flower_name_iris">Nőszirom</string>
     <string name="flower_name_daisy">Százszorszép</string>
     <string name="flower_name_crocus">Sáfrány</string>
+    <string name="flower_name_colts_foot">Martilapu</string>
+    <string name="flower_name_cowslip">Kankalin</string>
+    <string name="flower_name_buttercup">Boglárka</string>
+    <string name="flower_name_daffodil">Nárcisz</string>
+    <string name="flower_name_bluebell">Harangvirág</string>
+    <string name="flower_name_fritillary">Kockás liliom</string>
+    <string name="flower_name_lily_valley">Gyöngyvirág</string>
+    <string name="flower_name_tiger_lily">Tigrisliliom</string>
+    <string name="flower_name_windflower">Szellőrózsa</string>
 </resources>
