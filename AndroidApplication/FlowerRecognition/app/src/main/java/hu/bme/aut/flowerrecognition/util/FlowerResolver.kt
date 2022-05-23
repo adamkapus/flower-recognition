@@ -2,9 +2,11 @@ package hu.bme.aut.flowerrecognition.util
 
 import hu.bme.aut.flowerrecognition.R
 
+/**Egy virág label nevét oldja fel a megjelenítési nevére és ritkaság kategóriájára
+ */
 class FlowerResolver {
-    private var flowerDisplayNameMap = HashMap<String, Int>()
-    private var flowerRarityMap = HashMap<String, Rarity>()
+    private var flowerDisplayNameMap = HashMap<String, Int>() // [label név, res ID]
+    private var flowerRarityMap = HashMap<String, Rarity>() // [label név, Ritkaság]
 
     init {
         flowerDisplayNameMap["bluebell"] = R.string.flower_name_bluebell

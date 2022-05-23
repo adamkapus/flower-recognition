@@ -2,7 +2,6 @@ package hu.bme.aut.flowerrecognition.maps.viewmodel
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModel
 import hu.bme.aut.flowerrecognition.FlowerRecognitionApplication
 import hu.bme.aut.flowerrecognition.data.FlowerLocationRepository
@@ -22,7 +21,6 @@ class MapsViewModel : ViewModel() {
     val flowers: LiveData<List<FlowerLocation>> = _flowers
 
     fun refresh() {
-        //flowerLocRepo.refresh()
         flowerLocRepo.refresh(object : FlowerLocationRepository.RefreshCallback {
             override fun onCompleted(flowers: List<FlowerLocation>) {
                 _flowers.postValue(flowers)
@@ -32,10 +30,6 @@ class MapsViewModel : ViewModel() {
 
             }
         })
-    }
-
-    fun getFlowersLiveData(): LiveData<List<FlowerLocation>> {
-        return flowers
     }
 
     fun modifyRarities(rarity: Rarity, isChecked: Boolean) {

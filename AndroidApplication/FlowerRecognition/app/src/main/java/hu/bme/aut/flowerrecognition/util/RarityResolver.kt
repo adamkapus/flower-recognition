@@ -2,6 +2,9 @@ package hu.bme.aut.flowerrecognition.util
 
 import hu.bme.aut.flowerrecognition.R
 
+/**Egyelőre nem használt osztály a ritkaságok neveinek feloldására
+ */
+/*
 class RarityResolver {
     private var rarityMap = HashMap<Rarity, Int>()
 
@@ -16,8 +19,8 @@ class RarityResolver {
     }
 
 
-}
-
+}*/
+//Ritkaság kategóriák
 enum class Rarity {
     COMMON,
     RARE,

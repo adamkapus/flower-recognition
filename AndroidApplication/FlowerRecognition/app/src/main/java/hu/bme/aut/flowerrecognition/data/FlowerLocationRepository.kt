@@ -1,8 +1,6 @@
 package hu.bme.aut.flowerrecognition.data
 
 import android.util.Log
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.firestore.ktx.toObjects
@@ -10,11 +8,13 @@ import com.google.firebase.ktx.Firebase
 import hu.bme.aut.flowerrecognition.data.model.FlowerLocation
 import hu.bme.aut.flowerrecognition.util.FlowerResolver
 
-private const val TAG = "FlowrLoc Repo"
-
+//Repository osztály amely segítségével feltölthetünk egy új virágot, és lekérhetjük az eddigieket
 class FlowerLocationRepository {
+    companion object {
+        private const val TAG = "FlowerLoc Repo"
+    }
 
-    private var flowerResolver = FlowerResolver()
+    private var flowerResolver = FlowerResolver() //label névből megjelenítési név feloldására
 
     private var db: FirebaseFirestore = Firebase.firestore
 
