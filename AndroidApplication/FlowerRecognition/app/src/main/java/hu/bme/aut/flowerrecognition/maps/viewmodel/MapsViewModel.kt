@@ -11,8 +11,6 @@ import hu.bme.aut.flowerrecognition.util.Rarity
 
 class MapsViewModel : ViewModel() {
 
-    ///private val _viewAbleFlowers = MutableLiveData<List<FlowerLocation>>()
-    //val viewAbleFlowers : LiveData<List<FlowerLocation>> = _viewAbleFlowers
 
     private val flowerLocRepo = FlowerRecognitionApplication.flowerLocationRepository
 
@@ -20,12 +18,24 @@ class MapsViewModel : ViewModel() {
     private val _viewableRarities = MutableLiveData<Set<Rarity>>()
     val viewableRarities: LiveData<Set<Rarity>> = _viewableRarities
 
+    private val _flowers = MutableLiveData<List<FlowerLocation>>()
+    val flowers: LiveData<List<FlowerLocation>> = _flowers
+
     fun refresh() {
-        flowerLocRepo.refresh()
+        //flowerLocRepo.refresh()
+        flowerLocRepo.refresh(object : FlowerLocationRepository.RefreshCallback {
+            override fun onCompleted(flowers: List<FlowerLocation>) {
+                _flowers.postValue(flowers)
+            }
+
+            override fun onError() {
+
+            }
+        })
     }
 
     fun getFlowersLiveData(): LiveData<List<FlowerLocation>> {
-        return flowerLocRepo.flowers
+        return flowers
     }
 
     fun modifyRarities(rarity: Rarity, isChecked: Boolean) {

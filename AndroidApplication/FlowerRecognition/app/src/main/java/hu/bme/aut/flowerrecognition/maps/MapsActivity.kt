@@ -107,6 +107,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnInfoWi
             }
         )
 
+
     }
 
     private fun onCheckBoxClick(rarity: Rarity, isChecked: Boolean) {
@@ -140,15 +141,10 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnInfoWi
     override fun onMapReady(googleMap: GoogleMap) {
         mMap = googleMap
 
-        // Add a marker in Sydney and move the camera
-        val sydney = LatLng(-34.0, 151.0)
-        mMap.addMarker(MarkerOptions().position(sydney).title("Marker in Sydney"))
-        mMap.moveCamera(CameraUpdateFactory.newLatLng(sydney))
-
         mMap.setInfoWindowAdapter(FlowerInfoWindowAdapter())
         mMap.setOnInfoWindowClickListener(this)
 
-        mapsViewModel.getFlowersLiveData().observe(this,
+        mapsViewModel.flowers.observe(this,
             Observer {
                 Log.d(TAG, it.toString())
                 drawFlowersOnMap(it)

@@ -18,10 +18,6 @@ class FlowerLocationRepository {
 
     private var db: FirebaseFirestore = Firebase.firestore
 
-    private val _flowers = MutableLiveData<List<FlowerLocation>>()
-    val flowers: LiveData<List<FlowerLocation>> = _flowers
-
-
     fun addFlower(name: String, Lat: Double, Lng: Double, imageURL: String?) {
         val data = hashMapOf(
             "name" to name,
@@ -40,10 +36,16 @@ class FlowerLocationRepository {
             }
     }
 
-    fun refresh() {
+    fun refresh(callback: RefreshCallback) {
         db.collection("flowers").get().addOnSuccessListener { documents ->
-            _flowers.postValue(documents.toObjects<FlowerLocation>())
-        }
+            callback.onCompleted(documents.toObjects<FlowerLocation>())
+        }.addOnFailureListener{
+                e -> callback.onError()}
+    }
+
+    interface RefreshCallback {
+        fun onCompleted(flowers : List<FlowerLocation>)
+        fun onError()
     }
 
 
