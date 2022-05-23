@@ -31,6 +31,7 @@ import com.google.firebase.storage.FirebaseStorage
 import hu.bme.aut.flowerrecognition.R
 import hu.bme.aut.flowerrecognition.databinding.ActivityRecognizerBinding
 import hu.bme.aut.flowerrecognition.maps.MapsActivity
+import hu.bme.aut.flowerrecognition.ml.ConvModMeta
 import hu.bme.aut.flowerrecognition.ml.ConvModMetaScaleokes
 import hu.bme.aut.flowerrecognition.recognition.ui.RecognitionAdapter
 import hu.bme.aut.flowerrecognition.recognition.util.YuvToRgbConverter
@@ -118,6 +119,7 @@ class RecognizerActivity : AppCompatActivity() {
             }
         )
 
+        //TODO NEM TOP HANEM submit
         val stopButton: Button = findViewById(R.id.submit_button)
         stopButton.setOnClickListener {
             handleSubmittingFlower()
@@ -264,7 +266,7 @@ class RecognizerActivity : AppCompatActivity() {
         when (requestCode) {
             PERMISSIONS_REQUEST_CAMERA -> {
                 if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    startCamera()
+                    recogViewModel.startRecognition()
                 } else {
                     Toast.makeText(
                         this,
@@ -343,6 +345,7 @@ class RecognizerActivity : AppCompatActivity() {
                     recogViewModel.submitFlower(location.latitude, location.longitude, imageURL)
                 }
             } else {
+                //ToDo normalis vissazjelzes
                 Log.d(TAG, "Current location is null.")
             }
         }
@@ -417,7 +420,7 @@ class RecognizerActivity : AppCompatActivity() {
         ImageAnalysis.Analyzer {
 
 
-        private val flowerModel: ConvModMetaScaleokes by lazy {
+        private val flowerModel: ConvModMeta by lazy {
 
             val compatList = CompatibilityList()
 
@@ -430,7 +433,7 @@ class RecognizerActivity : AppCompatActivity() {
             }
 
             // Initialize the Flower Model
-            ConvModMetaScaleokes.newInstance(ctx, options)
+            ConvModMeta.newInstance(ctx, options)
         }
 
         override fun analyze(imageProxy: ImageProxy) {
