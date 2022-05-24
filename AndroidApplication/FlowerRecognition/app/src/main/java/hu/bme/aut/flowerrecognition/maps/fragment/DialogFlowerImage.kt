@@ -47,6 +47,7 @@ class DialogFlowerImage : AppCompatDialogFragment() {
         //Glide-al betöltjük a virág képét, a töltés közben egy progressbart mutatunk
         if (imageURI != null) {
             context?.let {
+                binding.imgLoadProgressbar.visibility = View.VISIBLE
                 Glide.with(it).load(imageURI).listener(object : RequestListener<Drawable> {
                     override fun onLoadFailed(
                         e: GlideException?,
@@ -54,8 +55,8 @@ class DialogFlowerImage : AppCompatDialogFragment() {
                         target: Target<Drawable>?,
                         isFirstResource: Boolean
                     ): Boolean {
-                        binding.imgLoadProgressbar.visibility = View.GONE;
-                        return false;
+                        binding.imgLoadProgressbar.visibility = View.GONE
+                        return false
                     }
 
                     override fun onResourceReady(
@@ -65,8 +66,8 @@ class DialogFlowerImage : AppCompatDialogFragment() {
                         dataSource: DataSource?,
                         isFirstResource: Boolean
                     ): Boolean {
-                        binding.imgLoadProgressbar.visibility = View.GONE;
-                        return false;
+                        binding.imgLoadProgressbar.visibility = View.GONE
+                        return false
                     }
                 }).into(binding.flowerImage)
             }

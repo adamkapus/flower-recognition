@@ -37,7 +37,7 @@
         android:id="@+id/img_load_progressbar"
         android:layout_width="match_parent"
         android:layout_height="25dp"
-        android:visibility="visible"
+        android:visibility="gone"
         android:indeterminateTint="@android:color/darker_gray"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
