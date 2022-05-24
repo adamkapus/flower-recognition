@@ -258,7 +258,7 @@ class RecognizerActivity : AppCompatActivity() {
         }
     }
 
-    //kép feltöltése Firebase Storage-ba, majd az URL-el birtokában továbbhívás a submitFlower-re
+    //kép feltöltése Firebase Storage-ba, majd az URL-je birtokában továbbhívás a submitFlower-re
     private fun uploadFlowerImage(){
         val bitmap: Bitmap? = binding.viewFinder.bitmap
 
@@ -376,7 +376,7 @@ class RecognizerActivity : AppCompatActivity() {
         cameraProvider.unbindAll()
     }
 
-    //ImageAnalyzer, amiben a kép alapján a TF Lite modellt futtatjuk
+    //ImageAnalysis.analizer implementálása, amiben a kép alapján a TF Lite modellt futtatjuk
     private class ImageAnalyzer(ctx: Context, private val listener: (recognition: List<Recognition>) -> Unit ) :
         ImageAnalysis.Analyzer {
 
