@@ -6,7 +6,6 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.annotation.Nullable
 import androidx.appcompat.app.AppCompatDialogFragment
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.DataSource
@@ -45,6 +44,7 @@ class DialogFlowerImage : AppCompatDialogFragment() {
 
         binding.flowerImageName.text = displayName
 
+        //Glide-al betöltjük a virág képét, a töltés közben egy progressbart mutatunk
         if (imageURI != null) {
             context?.let {
                 Glide.with(it).load(imageURI).listener(object : RequestListener<Drawable> {
@@ -69,10 +69,6 @@ class DialogFlowerImage : AppCompatDialogFragment() {
                         return false;
                     }
                 }).into(binding.flowerImage)
-            }
-        } else {
-            context?.let {
-                Glide.with(it).load("https://picsum.photos/400/600").into(binding.flowerImage)
             }
         }
 

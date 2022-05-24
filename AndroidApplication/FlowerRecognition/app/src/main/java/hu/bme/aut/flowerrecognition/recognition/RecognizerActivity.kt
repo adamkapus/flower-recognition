@@ -280,7 +280,7 @@ class RecognizerActivity : AppCompatActivity() {
 
             PERMISSIONS_ACCESS_FINE_LOCATION -> {
                 if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    submitFlower()
+                    uploadFlowerImage()
                 } else {
                     Toast.makeText(
                         this,

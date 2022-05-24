@@ -43,4 +43,6 @@
     <string name="flower_name_lily_valley">Gyöngyvirág</string>
     <string name="flower_name_tiger_lily">Tigrisliliom</string>
     <string name="flower_name_windflower">Szellőrózsa</string>
+    <string name="button_submit">SUBMIT</string>
+    <string name="button_start">START</string>
 </resources>

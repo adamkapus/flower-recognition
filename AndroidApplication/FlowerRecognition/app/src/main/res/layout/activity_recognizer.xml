@@ -24,12 +24,17 @@
         android:id="@+id/submit_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="SUBMIT" />
+        android:layout_gravity="start"
+        android:layout_margin="10dp"
+        android:backgroundTint="@android:color/holo_blue_dark"
+        android:text="@string/button_submit" />
 
     <Button
         android:id="@+id/start_camera_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="center_horizontal"
-        android:text="START" />
+        android:layout_gravity="end"
+        android:layout_margin="10dp"
+        android:backgroundTint="@android:color/holo_blue_dark"
+        android:text="@string/button_start" />
 </FrameLayout>
