@@ -105,34 +105,6 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnInfoWi
         }
     }
 
-    private fun onCheckBoxClick(rarity: Rarity, isChecked: Boolean) {
-        mapsViewModel.modifyRarities(rarity, isChecked)
-    }
-
-
-    override fun onCreateOptionsMenu(menu: Menu): Boolean {
-        val inflater: MenuInflater = menuInflater
-        inflater.inflate(R.menu.menu_toolbar, menu)
-        return true
-    }
-
-
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        return when (item.itemId) {
-            R.id.menu_recognizer -> {
-                val recognizerIntent = Intent(this, RecognizerActivity::class.java)
-                startActivity(recognizerIntent)
-                finish()
-                true
-            }
-            R.id.menu_map -> {
-                true
-            }
-
-            else -> super.onOptionsItemSelected(item)
-        }
-    }
-
     override fun onMapReady(googleMap: GoogleMap) {
         mMap = googleMap
 
@@ -161,6 +133,10 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnInfoWi
         Log.d(TAG, "OnMapReady")
     }
 
+    private fun onCheckBoxClick(rarity: Rarity, isChecked: Boolean) {
+        mapsViewModel.modifyRarities(rarity, isChecked)
+    }
+
 
     //akkor hívódik, ha változik a látható ritkaságok listája
     private fun onViewableRaritiesChanged(viewableRarities: Set<Rarity>) {
@@ -170,10 +146,13 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnInfoWi
         }
     }
 
+    //virágok kirajzolása a map-re
     private fun drawFlowersOnMap(flowers: List<FlowerLocation>) {
+        //az eddig a mapen lévő markereket töröljük
         for (m in markers.keys) {
             m.remove()
         }
+        //a [marker, FlowerOnMap] hashmap-et töröljük
         markers.clear()
 
         for (f in flowers) {
@@ -199,6 +178,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnInfoWi
                 } else {
                     Rarity.valueOf(f.rarity)
                 }
+                //betesszük a HashMap-be a markert és a FlowerOnMap-pé konvertált virágot
                 markers[marker] = FlowerOnMap(
                     name = f.name,
                     Lat = f.Lat,
@@ -210,6 +190,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnInfoWi
             }
         }
 
+        //látható rarityk beállítása
         mapsViewModel.viewableRarities.value?.let { onViewableRaritiesChanged(it) }
     }
 
@@ -340,6 +321,29 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnInfoWi
             }
         } catch (e: SecurityException) {
             Log.e("Exception: %s", e.message, e)
+        }
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu): Boolean {
+        val inflater: MenuInflater = menuInflater
+        inflater.inflate(R.menu.menu_toolbar, menu)
+        return true
+    }
+
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        return when (item.itemId) {
+            R.id.menu_recognizer -> {
+                val recognizerIntent = Intent(this, RecognizerActivity::class.java)
+                startActivity(recognizerIntent)
+                finish()
+                true
+            }
+            R.id.menu_map -> {
+                true
+            }
+
+            else -> super.onOptionsItemSelected(item)
         }
     }
 }
