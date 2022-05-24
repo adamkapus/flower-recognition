@@ -5,7 +5,6 @@ import android.annotation.SuppressLint
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Paint
-import android.graphics.drawable.Drawable
 import android.location.Location
 import android.os.Bundle
 import android.util.Log
@@ -40,25 +39,24 @@ import hu.bme.aut.flowerrecognition.recognition.RecognizerActivity
 import hu.bme.aut.flowerrecognition.util.FlowerResolver
 import hu.bme.aut.flowerrecognition.util.Rarity
 
-
-//private const val REQUEST_CODE_PERMISSIONS = 999 // Return code after asking for permission
-//private val REQUIRED_PERMISSIONS = arrayOf(Manifest.permission.CAMERA) // permission needed
-private const val TAG = "Maps Activity"
-private const val DEFAULT_ZOOM = 15
-private const val PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION = 1
-
-
 class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnInfoWindowClickListener {
+    companion object {
+        private const val TAG = "Maps Activity"
+        private const val DEFAULT_ZOOM = 15 // alap zoom a térképen
+        private const val PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION = 1
+    }
 
-    private lateinit var mMap: GoogleMap
     private lateinit var binding: ActivityMapsBinding
 
-    private var locationPermissionGranted = false
-    private lateinit var fusedLocationProviderClient: FusedLocationProviderClient
-    private var lastKnownLocation: Location? = null
-    private val defaultLocation = LatLng(-90.0, 90.0)
+    private lateinit var mMap: GoogleMap
 
-    private var markers = HashMap<Marker, FlowerOnMap>()
+    private var locationPermissionGranted = false //megkaptuk-e az engedélyt a lokációra
+    private lateinit var fusedLocationProviderClient: FusedLocationProviderClient
+    private var lastKnownLocation: Location? = null //utolsó ismert location
+    private val defaultLocation = LatLng(47.47330488455458, 19.05904249897747) //alap location BME Q épületre
+
+    private var markers = HashMap<Marker, FlowerOnMap>() //Markerek és a hozzájuk tartozó virág adatok map-je
+
     private var flowerResolver = FlowerResolver()
 
     private val mapsViewModel: MapsViewModel by viewModels()
@@ -68,15 +66,20 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnInfoWi
 
         binding = ActivityMapsBinding.inflate(layoutInflater)
         setContentView(binding.root)
+        title = "Map"
 
         fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this)
 
-        // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         val mapFragment = supportFragmentManager
             .findFragmentById(R.id.map) as SupportMapFragment
         mapFragment.getMapAsync(this)
 
-        title = "Map"
+        //feliratkozunk a látható ritkaságokra
+        mapsViewModel.viewableRarities.observe(this,
+            Observer {
+                onViewableRaritiesChanged(it)
+            }
+        )
 
         binding.fabRefresh.setOnClickListener { _ ->
             mapsViewModel.refresh()
@@ -100,14 +103,6 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnInfoWi
                 view.isChecked
             )
         }
-
-        mapsViewModel.viewableRarities.observe(this,
-            Observer {
-                onViewableRaritiesChanged(it)
-            }
-        )
-
-
     }
 
     private fun onCheckBoxClick(rarity: Rarity, isChecked: Boolean) {
@@ -144,6 +139,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnInfoWi
         mMap.setInfoWindowAdapter(FlowerInfoWindowAdapter())
         mMap.setOnInfoWindowClickListener(this)
 
+        //feliratkozunk a virágokra, változás esetén kirajzoljuk
         mapsViewModel.flowers.observe(this,
             Observer {
                 Log.d(TAG, it.toString())
@@ -151,16 +147,22 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnInfoWi
             }
         )
 
+        //lokáció engedély elkérése
         getLocationPermission()
 
+        //Google Maps UI frissítése
         updateLocationUI()
 
+        //lokáció meghatározása
         getDeviceLocation()
-        Log.d(TAG, "meghivva")
+
         mapsViewModel.refresh()
+
+        Log.d(TAG, "OnMapReady")
     }
 
 
+    //akkor hívódik, ha változik a látható ritkaságok listája
     private fun onViewableRaritiesChanged(viewableRarities: Set<Rarity>) {
         for (m in markers.entries) {
             val f = m.value
@@ -211,10 +213,12 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnInfoWi
         mapsViewModel.viewableRarities.value?.let { onViewableRaritiesChanged(it) }
     }
 
+    //InfoWindow adapter az egyedi InfoWindowokért a térképen
     internal inner class FlowerInfoWindowAdapter : GoogleMap.InfoWindowAdapter {
 
         private val window: View = layoutInflater.inflate(R.layout.flower_info_window, null)
 
+        //ezt a függvényt akkor kéne megvalósítani, ha az infowindow tartalmát akarnánk csak felülírni, de mi a kinézetét is szeretnénk
         override fun getInfoContents(marker: Marker): View? {
             return null
         }
@@ -224,6 +228,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnInfoWi
             return window
         }
 
+        //beállítjuk az egyedi info window kinézetét
         private fun render(marker: Marker, view: View) {
             val title: String? = markers[marker]?.displayName
             val titleUi = view.findViewById<TextView>(R.id.title)
@@ -240,6 +245,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnInfoWi
 
     }
 
+    //egy info windowra való klikkelés esetén egy Fragmenst dobunk fel ami megjeleníti a virág képét
     override fun onInfoWindowClick(marker: Marker) {
         val flowerName = markers[marker]?.displayName
         val imageUrl = markers[marker]?.imageUrl
@@ -283,9 +289,9 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnInfoWi
             }
             else -> super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         }
-        //updateLocationUI()
     }
 
+    //ha kapunk lokációt, odamozgatjuk a kamerát, egyébként a default lokációra
     @SuppressLint("MissingPermission")
     private fun getDeviceLocation() {
         try {
@@ -293,7 +299,6 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnInfoWi
                 val locationResult = fusedLocationProviderClient.lastLocation
                 locationResult.addOnCompleteListener(this) { task ->
                     if (task.isSuccessful) {
-                        // Set the map's camera position to the current location of the device.
                         lastKnownLocation = task.result
                         if (lastKnownLocation != null) {
                             mMap.moveCamera(
@@ -321,6 +326,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnInfoWi
         }
     }
 
+    //Térkép UI frissítése, ha kaptunk engedélyt a lokációra
     @SuppressLint("MissingPermission")
     private fun updateLocationUI() {
         try {
@@ -331,7 +337,6 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnInfoWi
                 mMap.isMyLocationEnabled = false
                 mMap.uiSettings.isMyLocationButtonEnabled = false
                 lastKnownLocation = null
-                //getLocationPermission()
             }
         } catch (e: SecurityException) {
             Log.e("Exception: %s", e.message, e)

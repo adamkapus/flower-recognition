@@ -10,16 +10,16 @@ import hu.bme.aut.flowerrecognition.util.Rarity
 
 class MapsViewModel : ViewModel() {
 
-
     private val flowerLocRepo = FlowerRecognitionApplication.flowerLocationRepository
 
-    private val raritySet = mutableSetOf<Rarity>(*Rarity.values());
+    private val raritySet = mutableSetOf<Rarity>(*Rarity.values()); //az összes ritkasági kategória
     private val _viewableRarities = MutableLiveData<Set<Rarity>>()
-    val viewableRarities: LiveData<Set<Rarity>> = _viewableRarities
+    val viewableRarities: LiveData<Set<Rarity>> = _viewableRarities //UI-on látható ritkaságok
 
     private val _flowers = MutableLiveData<List<FlowerLocation>>()
-    val flowers: LiveData<List<FlowerLocation>> = _flowers
+    val flowers: LiveData<List<FlowerLocation>> = _flowers //FlowerLocation-ok listája
 
+    //újratölti a virágok listáját
     fun refresh() {
         flowerLocRepo.refresh(object : FlowerLocationRepository.RefreshCallback {
             override fun onCompleted(flowers: List<FlowerLocation>) {
@@ -32,6 +32,7 @@ class MapsViewModel : ViewModel() {
         })
     }
 
+    //módosítja a látható ritkaságok listáját, paraméterben megkapja, hogy melyik ritkaságot kell kivenni, vagy hozzáadni
     fun modifyRarities(rarity: Rarity, isChecked: Boolean) {
         if (isChecked) {
             raritySet.add(rarity)

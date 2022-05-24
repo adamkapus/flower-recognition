@@ -18,6 +18,7 @@ class FlowerLocationRepository {
 
     private var db: FirebaseFirestore = Firebase.firestore
 
+    //Egy FlowerLocation feltöltése a Firestoreba
     fun addFlower(name: String, Lat: Double, Lng: Double, imageURL: String?) {
         val data = hashMapOf(
             "name" to name,
@@ -36,17 +37,17 @@ class FlowerLocationRepository {
             }
     }
 
+    //lekérdezi az egész kollekciót, a hívó egy callback objektumot kell adjon, amin keresztül megtörténik majd az eredmény visszaadása
     fun refresh(callback: RefreshCallback) {
         db.collection("flowers").get().addOnSuccessListener { documents ->
             callback.onCompleted(documents.toObjects<FlowerLocation>())
         }.addOnFailureListener{
-                e -> callback.onError()}
+                _ -> callback.onError()}
     }
 
     interface RefreshCallback {
         fun onCompleted(flowers : List<FlowerLocation>)
         fun onError()
     }
-
 
 }
