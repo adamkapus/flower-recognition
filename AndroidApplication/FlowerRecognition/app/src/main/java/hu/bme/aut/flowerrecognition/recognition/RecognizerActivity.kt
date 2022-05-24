@@ -32,7 +32,6 @@ import hu.bme.aut.flowerrecognition.R
 import hu.bme.aut.flowerrecognition.databinding.ActivityRecognizerBinding
 import hu.bme.aut.flowerrecognition.maps.MapsActivity
 import hu.bme.aut.flowerrecognition.ml.ConvModMeta
-import hu.bme.aut.flowerrecognition.ml.ConvModMetaScaleokes
 import hu.bme.aut.flowerrecognition.recognition.ui.RecognitionAdapter
 import hu.bme.aut.flowerrecognition.recognition.util.YuvToRgbConverter
 import hu.bme.aut.flowerrecognition.recognition.viewmodel.Recognition
@@ -46,20 +45,11 @@ import java.net.URLEncoder
 import java.util.*
 import java.util.concurrent.Executors
 
-// Listener for the result of the ImageAnalyzer
-typealias RecognitionListener = (recognition: List<Recognition>) -> Unit
-
-/**
- * Main entry point into TensorFlow Lite Classifier
- */
 class RecognizerActivity : AppCompatActivity() {
 
     companion object {
         private const val PERMISSIONS_REQUEST_CAMERA = 999
         private const val PERMISSIONS_ACCESS_FINE_LOCATION = 1
-
-        private const val MAX_RESULT_DISPLAY = 7
-
         private const val TAG = "Recognizer Activity"
     }
 
@@ -68,13 +58,12 @@ class RecognizerActivity : AppCompatActivity() {
     private lateinit var startButton: Button
 
     // CameraX variables
-    private lateinit var preview: Preview // Preview use case, fast, responsive view of the camera
+    private lateinit var preview: Preview
     private lateinit var imageAnalyzer: ImageAnalysis // Analysis use case, for running ML code
     private lateinit var camera: Camera
     private val cameraExecutor = Executors.newSingleThreadExecutor()
 
     private lateinit var fusedLocationProviderClient: FusedLocationProviderClient
-
 
     private val recogViewModel: RecognitionViewModel by viewModels()
 
@@ -92,70 +81,78 @@ class RecognizerActivity : AppCompatActivity() {
 
         val viewAdapter = RecognitionAdapter(this)
         binding.recognitionResults.adapter = viewAdapter
-        // Disable recycler view animation to reduce flickering, otherwise items can move, fade in
-        // and out as the list change
         binding.recognitionResults.itemAnimator = null
 
+        //feliratkozunk a viewmodel felismeréslistájára, ha frissül, akkor az adapterbe submiteljük
         recogViewModel.recognitionList.observe(this,
             Observer {
                 viewAdapter.submitList(it)
             }
         )
 
-
+        //feliratkozunk a viewmodelnél arra, hogy milyen állapotban van a felismerés
         recogViewModel.stateOfRecognition.observe(this,
             Observer {
                 when (it) {
                     StateOfRecognition.READY_TO_START -> {
-                        submitButton.isEnabled = false; startButton.isEnabled = true;
+                        //ha készen állunk a kezdésra -> submit gomb nem kattintható, start gomb kattintható
+                        submitButton.isEnabled = false; startButton.isEnabled = true
                     }
                     StateOfRecognition.IN_PROGRESS -> {
+                        //ha folyamatban van -> egyik gomb se kattintható, elindítjuk a kamerát
                         submitButton.isEnabled = false; startButton.isEnabled = false; startCamera()
                     }
                     StateOfRecognition.FINISHED -> {
+                        //ha befejeződött -> mindkét gomb kattintható, leállítjuk a kamerát
                         submitButton.isEnabled = true; startButton.isEnabled = true; stopCamera()
                     }
                 }
             }
         )
 
-        //TODO NEM TOP HANEM submit
-        val stopButton: Button = findViewById(R.id.submit_button)
-        stopButton.setOnClickListener {
+        submitButton.setOnClickListener {
             handleSubmittingFlower()
         }
 
-        val startButton: Button = findViewById(R.id.start_camera_button)
         startButton.setOnClickListener {
             handleStartingRecognition()
         }
 
-
     }
 
-    override fun onCreateOptionsMenu(menu: Menu): Boolean {
-        val inflater: MenuInflater = menuInflater
-        inflater.inflate(R.menu.menu_toolbar, menu)
-        return true
-    }
+    //start gomb megnyomására hívódik, elindítjuk a felismerést, ha van engedélyünk a kamera használatára;  ha nincs, akkor kérünk engedélyt
+    private fun handleStartingRecognition() {
+        if (permissionGranted(arrayOf(Manifest.permission.CAMERA))) {
+            recogViewModel.startRecognition()
+        } else if (ActivityCompat.shouldShowRequestPermissionRationale(
+                this,
+                Manifest.permission.CAMERA
+            )
+        ) {
+            showRationaleDialog(
+                explanation = R.string.camera_permission_explanation,
+                onNegativeButton = {
+                    Toast.makeText(
+                        this,
+                        getString(R.string.permission_deny_camera_text),
+                        Toast.LENGTH_SHORT
+                    ).show()
+                },
+                onPositiveButton = {
+                    (this::requestPermission)(
+                        arrayOf(Manifest.permission.CAMERA),
+                        PERMISSIONS_REQUEST_CAMERA
+                    )
+                }
+            )
 
-
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        return when (item.itemId) {
-            R.id.menu_recognizer -> {
-                true
-            }
-            R.id.menu_map -> {
-                val mapsIntent = Intent(this, MapsActivity::class.java)
-                startActivity(mapsIntent)
-                finish()
-                true
-            }
-
-            else -> super.onOptionsItemSelected(item)
+        } else {
+            requestPermission(arrayOf(Manifest.permission.CAMERA), PERMISSIONS_REQUEST_CAMERA)
         }
     }
 
+
+    //submit gomb megnyomására hívódik, ha nincs engedélyünk a lokációra, akkor elkéri, egyébként folytatja a submit folyamatot
     private fun handleSubmittingFlower() {
         if (permissionGranted(arrayOf(Manifest.permission.ACCESS_FINE_LOCATION))) {
             uploadFlowerImage()
@@ -188,39 +185,8 @@ class RecognizerActivity : AppCompatActivity() {
             )
         }
 
-
     }
 
-
-    private fun handleStartingRecognition() {
-        if (permissionGranted(arrayOf(Manifest.permission.CAMERA))) {
-            recogViewModel.startRecognition()
-        } else if (ActivityCompat.shouldShowRequestPermissionRationale(
-                this,
-                Manifest.permission.CAMERA
-            )
-        ) {
-            showRationaleDialog(
-                explanation = R.string.camera_permission_explanation,
-                onNegativeButton = {
-                    Toast.makeText(
-                        this,
-                        getString(R.string.permission_deny_camera_text),
-                        Toast.LENGTH_SHORT
-                    ).show()
-                },
-                onPositiveButton = {
-                    (this::requestPermission)(
-                        arrayOf(Manifest.permission.CAMERA),
-                        PERMISSIONS_REQUEST_CAMERA
-                    )
-                }
-            )
-
-        } else {
-            requestPermission(arrayOf(Manifest.permission.CAMERA), PERMISSIONS_REQUEST_CAMERA)
-        }
-    }
 
     private fun permissionGranted(permissions: Array<String>): Boolean = permissions.all {
         ContextCompat.checkSelfPermission(
@@ -273,7 +239,6 @@ class RecognizerActivity : AppCompatActivity() {
                         getString(R.string.permission_deny_camera_text),
                         Toast.LENGTH_SHORT
                     ).show()
-                    //finish()
                 }
                 return
             }
@@ -293,6 +258,7 @@ class RecognizerActivity : AppCompatActivity() {
         }
     }
 
+    //kép feltöltése Firebase Storage-ba, majd az URL-el birtokában továbbhívás a submitFlower-re
     private fun uploadFlowerImage(){
         val bitmap: Bitmap? = binding.viewFinder.bitmap
 
@@ -333,6 +299,7 @@ class RecognizerActivity : AppCompatActivity() {
     }
 
 
+    //lokáció meghatározása, majd a viewmodellen továbbhívás a virág beküldésére
     @SuppressLint("MissingPermission")
     private fun submitFlower(imageURL: String? = null) {
 
@@ -345,20 +312,12 @@ class RecognizerActivity : AppCompatActivity() {
                     recogViewModel.submitFlower(location.latitude, location.longitude, imageURL)
                 }
             } else {
-                //ToDo normalis vissazjelzes
                 Log.d(TAG, "Current location is null.")
             }
         }
     }
 
-    /**
-     * Start the Camera which involves:
-     *
-     * 1. Initialising the preview use case
-     * 2. Initialising the image analyser use case
-     * 3. Attach both to the lifecycle of this activity
-     * 4. Pipe the output of the preview object to the PreviewView on the screen
-     */
+    //kamera indítása, preview use case és image analyzer use case inicializálása, preview beállítása a PreviewView-ra
     private fun startCamera() {
         val cameraProviderFuture = ProcessCameraProvider.getInstance(this)
 
@@ -410,13 +369,15 @@ class RecognizerActivity : AppCompatActivity() {
         }, ContextCompat.getMainExecutor(this))
     }
 
+    //use casek unbindolása
     private fun stopCamera() {
         val cameraProviderFuture = ProcessCameraProvider.getInstance(this)
         val cameraProvider: ProcessCameraProvider = cameraProviderFuture.get()
         cameraProvider.unbindAll()
     }
 
-    private class ImageAnalyzer(ctx: Context, private val listener: RecognitionListener) :
+    //ImageAnalyzer, amiben a kép alapján a TF Lite modellt futtatjuk
+    private class ImageAnalyzer(ctx: Context, private val listener: (recognition: List<Recognition>) -> Unit ) :
         ImageAnalysis.Analyzer {
 
 
@@ -447,7 +408,7 @@ class RecognizerActivity : AppCompatActivity() {
             val outputs = flowerModel.process(tfImage)
                 .probabilityAsCategoryList.apply {
                     sortByDescending { it.score } // Sort with highest confidence first
-                }.take(MAX_RESULT_DISPLAY) // take the top results
+                }// take the top results
 
             //Converting the top probability items into a list of recognitions
             for (output in outputs) {
@@ -502,9 +463,10 @@ class RecognizerActivity : AppCompatActivity() {
 
     }
 
+    //progress dialog képfeltöltés közbenre
     private var progressDialog: ProgressDialog? = null
 
-    fun showProgressDialog() {
+    private fun showProgressDialog() {
         if (progressDialog != null) {
             return
         }
@@ -516,13 +478,41 @@ class RecognizerActivity : AppCompatActivity() {
         }
     }
 
-    protected fun hideProgressDialog() {
+    private fun hideProgressDialog() {
         progressDialog?.let { dialog ->
             if (dialog.isShowing) {
                 dialog.dismiss()
             }
         }
         progressDialog = null
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu): Boolean {
+        val inflater: MenuInflater = menuInflater
+        inflater.inflate(R.menu.menu_toolbar, menu)
+        return true
+    }
+
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        return when (item.itemId) {
+            R.id.menu_recognizer -> {
+                true
+            }
+            R.id.menu_map -> {
+                val mapsIntent = Intent(this, MapsActivity::class.java)
+                startActivity(mapsIntent)
+                finish()
+                true
+            }
+
+            else -> super.onOptionsItemSelected(item)
+        }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        cameraExecutor.shutdown()
     }
 
 }

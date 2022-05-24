@@ -22,8 +22,8 @@ class RecognitionAdapter(private val ctx: Context) :
     }
 
     override fun onBindViewHolder(holder: RecognitionViewHolder, position: Int) {
-        //holder.bindTo(getItem(position))
         val recognition :Recognition = getItem(position)
+        //konvertálás megjelenítési névre a label névről
         holder.displayName.text = holder.itemView.context.getString(flowerResolver.getDisplayName(recognition.label))
         holder.probability.text = recognition.probabilityString;
     }
@@ -46,11 +46,7 @@ class RecognitionAdapter(private val ctx: Context) :
         init{
 
         }
-        /*fun bindTo(recognition: Recognition) {
-            //binding.recognitionItem = recognition
-            //binding.executePendingBindings()
-            binding.recognitionDisplayName.text = getString(flowerResolver.getDisplayName(recognition.label))
-        }*/
+
     }
 
 

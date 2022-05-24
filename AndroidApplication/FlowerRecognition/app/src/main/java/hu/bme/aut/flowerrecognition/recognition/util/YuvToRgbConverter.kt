@@ -13,6 +13,7 @@ import android.renderscript.Type
 import hu.bme.aut.flowerrecognition.BuildConfig
 import java.nio.ByteBuffer
 
+//Ez teljes mértékben a TensorFlow Lite mintaprojekt kódja
 /**
  * Helper class used to efficiently convert a [Media.Image] object from
  * [ImageFormat.YUV_420_888] format to an RGB [Bitmap] object.
